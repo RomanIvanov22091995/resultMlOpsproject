@@ -83,7 +83,7 @@ dvc repro
 
 # 4. Результаты
 dvc metrics show
-mlflow ui --backend-store-uri sqlite:///mlflow.db --port 5000   # http://localhost:5000
+mlflow ui --backend-store-uri sqlite:///mlflow.db --port 5000   # http://localhost:5000 → «Model training» → «Training runs»
 ```
 
 ### Тесты и качество кода
@@ -220,7 +220,7 @@ mlflow ui --backend-store-uri sqlite:///mlflow.db --port 5000
 
 ## Тестирование и CI
 
-78 тестов (`pytest --cov=src`, покрытие ≈82%):
+78 тестов (`pytest --cov=src`, покрытие ≈97%):
 
 | Файл | Что проверяет |
 |---|---|
