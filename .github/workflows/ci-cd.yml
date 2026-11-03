@@ -1,0 +1,107 @@
+name: CI/CD
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHON_VERSION: "3.11"
+
+jobs:
+  lint:
+    name: Code quality (black + flake8)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: Install linters
+        run: pip install black==26.10.1 flake8==7.5.0
+      - name: Check formatting (black)
+        run: black --check --diff .
+      - name: Lint (flake8)
+        run: flake8 .
+
+  data-validation:
+    name: Data validation (Great Expectations)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: requirements.txt
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      # Полный датасет хранится в DVC; в CI проверяется версионируемая в git выборка.
+      - name: Validate data sample with Great Expectations
+        run: >
+          python -m src.data.validation
+          --input data/sample/credit_sample.csv
+          --suite-out reports/ci/credit_data_suite.json
+          --report-out reports/ci/sample_validation.json
+      - name: Upload validation report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: data-validation-report
+          path: reports/ci/
+
+  test:
+    name: Unit tests (pytest)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: requirements*.txt
+      - name: Install dependencies
+        run: pip install -r requirements.txt pytest==9.2.0 pytest-cov==7.1.0 httpx==0.28.1
+      - name: Run tests
+        run: pytest --cov=src --cov-report=term-missing --cov-report=xml
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: coverage.xml
+
+  docker:
+    name: Build image & smoke-test API
+    runs-on: ubuntu-latest
+    needs: [lint, data-validation, test]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: requirements.txt
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      # Модель в git не хранится (DVC), поэтому для проверки образа обучаем
+      # быструю модель на выборке из репозитория.
+      - name: Train a quick model on the sample
+        run: |
+          python -m src.data.make_dataset --input data/sample/credit_sample.csv
+          python -m src.models.train --models logistic_regression --cv-folds 3 --no-register
+      - name: Build Docker image
+        run: docker build -t credit-scoring-api:${{ github.sha }} .
+      - name: Run container
+        run: docker run -d --name api -p 8000:8000 credit-scoring-api:${{ github.sha }}
+      - name: Smoke-test API
+        run: python scripts/smoke_test_api.py --url http://localhost:8000 --wait 90
+      - name: Drift monitoring against the running API
+        run: python -m src.monitoring.simulate_traffic --api-url http://localhost:8000 --n-samples 200 --output-dir reports/ci-monitoring
+      - name: Container logs
+        if: always()
+        run: docker logs api
