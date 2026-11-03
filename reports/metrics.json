@@ -1,0 +1,23 @@
+{
+  "best_model": "hist_gradient_boosting",
+  "cv_roc_auc": 0.789,
+  "threshold": 0.2763,
+  "test": {
+    "roc_auc": 0.7793,
+    "gini": 0.5586,
+    "ks": 0.425,
+    "pr_auc": 0.5604,
+    "precision": 0.5118,
+    "recall": 0.5701,
+    "f1": 0.5394,
+    "accuracy": 0.7846,
+    "brier": 0.135,
+    "log_loss": 0.4297
+  },
+  "test_threshold_0_5": {
+    "precision": 0.6648,
+    "recall": 0.3665,
+    "f1": 0.4725,
+    "accuracy": 0.819
+  }
+}

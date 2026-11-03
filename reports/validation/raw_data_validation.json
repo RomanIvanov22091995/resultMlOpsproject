@@ -1,0 +1,7 @@
+{
+  "success": true,
+  "n_rows": 30000,
+  "evaluated_expectations": 100,
+  "successful_expectations": 100,
+  "failed_expectations": []
+}

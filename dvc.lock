@@ -1,0 +1,260 @@
+schema: '2.0'
+stages:
+  validate:
+    cmd: python -m src.data.validation --input data/raw/UCI_Credit_Card.csv
+    deps:
+    - path: data/raw/UCI_Credit_Card.csv
+      hash: md5
+      md5: 940b416bb13a9b24bb5c9e1589284005
+      size: 2862995
+    - path: src/config.py
+      hash: md5
+      md5: cff19c6edfe2b3b9c0804fa2f15f7876
+      size: 1897
+    - path: src/data/validation.py
+      hash: md5
+      md5: 8606a9d58776cd640df4d2567e481126
+      size: 9016
+    params:
+      params.yaml:
+        validation:
+          suite_path: data/expectations/credit_data_suite.json
+          report_path: reports/validation/raw_data_validation.json
+    outs:
+    - path: data/expectations/credit_data_suite.json
+      hash: md5
+      md5: 1b69d45c206206ddf65c14250c5405bf
+      size: 18879
+    - path: reports/validation/raw_data_validation.json
+      hash: md5
+      md5: c8a4735ed298ba2d62d3c7e44bf923dd
+      size: 142
+  prepare:
+    cmd: python -m src.data.make_dataset
+    deps:
+    - path: data/raw/UCI_Credit_Card.csv
+      hash: md5
+      md5: 940b416bb13a9b24bb5c9e1589284005
+      size: 2862995
+    - path: reports/validation/raw_data_validation.json
+      hash: md5
+      md5: c8a4735ed298ba2d62d3c7e44bf923dd
+      size: 142
+    - path: src/config.py
+      hash: md5
+      md5: cff19c6edfe2b3b9c0804fa2f15f7876
+      size: 1897
+    - path: src/data/make_dataset.py
+      hash: md5
+      md5: a71503795bf45000bc28b660d7b24aee
+      size: 4383
+    params:
+      params.yaml:
+        base.random_state: 42
+        data:
+          raw_path: data/raw/UCI_Credit_Card.csv
+          processed_dir: data/processed
+          test_size: 0.2
+    outs:
+    - path: data/processed/test.csv
+      hash: md5
+      md5: 895d481fa6a4b9bdb405dd33ceba194c
+      size: 701537
+    - path: data/processed/train.csv
+      hash: md5
+      md5: 752ccbea60bfbe978977aa23045f76c6
+      size: 2803853
+  train:
+    cmd: python -m src.models.train
+    deps:
+    - path: data/processed/test.csv
+      hash: md5
+      md5: 895d481fa6a4b9bdb405dd33ceba194c
+      size: 701537
+    - path: data/processed/train.csv
+      hash: md5
+      md5: 752ccbea60bfbe978977aa23045f76c6
+      size: 2803853
+    - path: src/features/build_features.py
+      hash: md5
+      md5: 1e2f8fed7cd3f9179892a89fcfc6304d
+      size: 5512
+    - path: src/models/evaluate.py
+      hash: md5
+      md5: 1ecc60ceabdd4f63aba442d219efd129
+      size: 9950
+    - path: src/models/pipeline.py
+      hash: md5
+      md5: 8a4d79585e8c2d5ce29b67c4f713f912
+      size: 4592
+    - path: src/models/train.py
+      hash: md5
+      md5: 13a74d72fe87f9a17df45413268fdbcd
+      size: 20143
+    params:
+      params.yaml:
+        base.random_state: 42
+        models:
+          logistic_regression:
+            search: grid
+            params:
+              C:
+              - 0.01
+              - 0.1
+              - 1.0
+              - 10.0
+              class_weight:
+              - 
+              - balanced
+          random_forest:
+            search: random
+            n_iter: 12
+            params:
+              n_estimators:
+              - 200
+              - 400
+              max_depth:
+              - 6
+              - 10
+              - 14
+              - 
+              min_samples_leaf:
+              - 1
+              - 5
+              - 20
+              max_features:
+              - sqrt
+              - 0.3
+              class_weight:
+              - 
+              - balanced_subsample
+          extra_trees:
+            search: random
+            n_iter: 10
+            params:
+              n_estimators:
+              - 200
+              - 400
+              max_depth:
+              - 8
+              - 12
+              - 
+              min_samples_leaf:
+              - 1
+              - 5
+              - 20
+              max_features:
+              - sqrt
+              - 0.5
+          gradient_boosting:
+            search: random
+            n_iter: 12
+            params:
+              n_estimators:
+              - 100
+              - 200
+              - 300
+              learning_rate:
+              - 0.03
+              - 0.05
+              - 0.1
+              max_depth:
+              - 2
+              - 3
+              - 4
+              subsample:
+              - 0.8
+              - 1.0
+              min_samples_leaf:
+              - 1
+              - 20
+              - 50
+          hist_gradient_boosting:
+            search: random
+            n_iter: 15
+            params:
+              learning_rate:
+              - 0.03
+              - 0.05
+              - 0.1
+              max_iter:
+              - 100
+              - 200
+              - 400
+              max_leaf_nodes:
+              - 15
+              - 31
+              - 63
+              min_samples_leaf:
+              - 20
+              - 50
+              - 100
+              l2_regularization:
+              - 0.0
+              - 0.1
+              - 1.0
+        train:
+          cv_folds: 5
+          scoring: roc_auc
+          n_jobs: -1
+          threshold_metric: f1
+          model_path: models/credit_default_model.pkl
+          meta_path: models/model_meta.json
+          reference_scores_path: models/reference_scores.csv
+          metrics_path: reports/metrics.json
+          figures_dir: reports/figures
+          roc_points_path: reports/roc_curve.csv
+          summary_path: reports/experiments_summary.csv
+    outs:
+    - path: models/credit_default_model.pkl
+      hash: md5
+      md5: 12fd4ae36a6d10e13b57b573b4934ce0
+      size: 273082
+    - path: models/model_meta.json
+      hash: md5
+      md5: 773a9e03b399482009c2ae9ed791e9fc
+      size: 1222
+    - path: models/reference_scores.csv
+      hash: md5
+      md5: cebb23eec0e7fa218747da4de30f8be2
+      size: 237016
+    - path: reports/experiments_summary.csv
+      hash: md5
+      md5: 963532871e47c951e0c8fb54918ee2ba
+      size: 828
+    - path: reports/figures/calibration_curve.png
+      hash: md5
+      md5: 7783764363ff65addbc0f812b9195db0
+      size: 35793
+    - path: reports/figures/confusion_matrix.png
+      hash: md5
+      md5: 11c57bca06f3466255967fdb47361a1d
+      size: 18939
+    - path: reports/figures/feature_importance.png
+      hash: md5
+      md5: f701cde8944311ac1e46ce994ba84cd8
+      size: 46517
+    - path: reports/figures/model_comparison.png
+      hash: md5
+      md5: 41a9329496b3ceac46dfa9a7ff2e42c5
+      size: 37732
+    - path: reports/figures/pr_curve.png
+      hash: md5
+      md5: efee6227f38c576782af1acb5fd0c13d
+      size: 37018
+    - path: reports/figures/roc_curve.png
+      hash: md5
+      md5: 1eb4b3d39e90307107695ebb34fa085e
+      size: 40496
+    - path: reports/figures/score_distribution.png
+      hash: md5
+      md5: 9b013749464724cdaad49ddfa12984ff
+      size: 23935
+    - path: reports/metrics.json
+      hash: md5
+      md5: a65d4ad4831bfe8b4a637b61d8ee695d
+      size: 461
+    - path: reports/roc_curve.csv
+      hash: md5
+      md5: 4b3252e832326def157075ec85cafbf5
+      size: 27171

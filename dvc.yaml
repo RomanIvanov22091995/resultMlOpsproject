@@ -1,0 +1,81 @@
+# DVC-пайплайн: validate -> prepare -> train.
+# Запуск всего пайплайна: `dvc repro`. DVC перезапускает только те стадии,
+# у которых изменились зависимости (deps), параметры (params) или код.
+stages:
+  validate:
+    desc: Validate raw data with Great Expectations (fails the pipeline on anomalies)
+    cmd: python -m src.data.validation --input data/raw/UCI_Credit_Card.csv
+    deps:
+      - data/raw/UCI_Credit_Card.csv
+      - src/data/validation.py
+      - src/config.py
+    params:
+      - validation
+    outs:
+      - data/expectations/credit_data_suite.json:
+          cache: false
+      - reports/validation/raw_data_validation.json:
+          cache: false
+
+  prepare:
+    desc: Clean raw data and split it into stratified train/test sets
+    cmd: python -m src.data.make_dataset
+    deps:
+      - data/raw/UCI_Credit_Card.csv
+      # отчёт валидации как зависимость: prepare идёт только после validate
+      - reports/validation/raw_data_validation.json
+      - src/data/make_dataset.py
+      - src/config.py
+    params:
+      - base.random_state
+      - data
+    outs:
+      - data/processed/train.csv
+      - data/processed/test.csv
+
+  train:
+    desc: Hyperparameter search for 5 algorithms with MLflow tracking, save the best model
+    cmd: python -m src.models.train
+    deps:
+      - data/processed/train.csv
+      - data/processed/test.csv
+      - src/features/build_features.py
+      - src/models/pipeline.py
+      - src/models/train.py
+      - src/models/evaluate.py
+    params:
+      - base.random_state
+      - train
+      - models
+    outs:
+      - models/credit_default_model.pkl
+      - models/reference_scores.csv
+      - models/model_meta.json:
+          cache: false
+      - reports/experiments_summary.csv:
+          cache: false
+    metrics:
+      - reports/metrics.json:
+          cache: false
+    plots:
+      - reports/roc_curve.csv:
+          cache: false
+          x: fpr
+          y: tpr
+          title: ROC curve (test set)
+          x_label: False Positive Rate
+          y_label: True Positive Rate
+      - reports/figures/roc_curve.png:
+          cache: false
+      - reports/figures/pr_curve.png:
+          cache: false
+      - reports/figures/confusion_matrix.png:
+          cache: false
+      - reports/figures/calibration_curve.png:
+          cache: false
+      - reports/figures/score_distribution.png:
+          cache: false
+      - reports/figures/feature_importance.png:
+          cache: false
+      - reports/figures/model_comparison.png:
+          cache: false
