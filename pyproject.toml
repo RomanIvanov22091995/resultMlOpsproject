@@ -1,0 +1,31 @@
+[project]
+name = "credit-scoring-model"
+version = "1.0.0"
+description = "End-to-end MLOps pipeline for a credit card default (PD) scoring model"
+readme = "README.md"
+requires-python = ">=3.11"
+
+[tool.black]
+line-length = 100
+target-version = ["py311"]
+extend-exclude = '''
+/(
+    \.venv
+  | mlruns
+  | \.dvc
+)/
+'''
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-ra"
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::FutureWarning",
+    "ignore:.*Inferred schema contains integer.*:UserWarning",
+]
+
+[tool.coverage.run]
+source = ["src"]
+omit = ["src/monitoring/simulate_traffic.py"]

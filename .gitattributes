@@ -1,0 +1,6 @@
+# Единые окончания строк (LF) для кода и конфигов: проект запускается
+# и в Windows, и в Linux (Docker, GitHub Actions).
+* text=auto eol=lf
+*.ps1 text eol=crlf
+*.png binary
+*.pkl binary

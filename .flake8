@@ -1,0 +1,13 @@
+[flake8]
+max-line-length = 100
+# E203/W503 конфликтуют с форматированием black
+extend-ignore = E203, W503
+exclude =
+    .git,
+    .venv,
+    .dvc,
+    __pycache__,
+    mlruns,
+    notebooks
+per-file-ignores =
+    src/__init__.py: F401

@@ -1,0 +1,12 @@
+# Зависимости для разработки: тесты, линтеры, DVC, ноутбуки.
+-r requirements.txt
+pytest==9.2.0
+pytest-cov==7.1.0
+httpx==0.28.1
+flake8==7.5.0
+black==26.10.1
+dvc==3.67.1
+jupyter==1.1.1
+nbconvert==7.17.2
+ipykernel==7.4.0
+seaborn==0.13.2

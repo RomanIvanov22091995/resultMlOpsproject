@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.env
+
+# Tests / coverage
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# MLflow (локальное хранилище экспериментов)
+mlruns/
+mlartifacts/
+mlflow.db
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Личные заметки (не часть сдаваемого проекта)
+GUIDE_RU.md
