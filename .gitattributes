@@ -4,3 +4,12 @@
 *.ps1 text eol=crlf
 *.png binary
 *.pkl binary
+
+# Выходы DVC-стадий с `cache: false` хранятся в git байт-в-байт:
+# их хэши записаны в dvc.lock, конвертация окончаний строк сломала бы `dvc status`.
+data/expectations/** -text
+reports/validation/** -text
+reports/metrics.json -text
+reports/roc_curve.csv -text
+reports/experiments_summary.csv -text
+models/model_meta.json -text
