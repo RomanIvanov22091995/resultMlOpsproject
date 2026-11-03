@@ -164,35 +164,44 @@ def plot_score_distribution(
 
 
 def feature_importance(pipeline: Pipeline, X: pd.DataFrame, y, random_state: int = 42) -> pd.Series:
-    """Важность признаков: встроенная у деревьев, |coef| у логрегрессии,
-    permutation importance (по сырым признакам) для остальных моделей."""
+    """Важность признаков: встроенная у деревьев (impurity), |coef| у логрегрессии,
+    permutation importance для остальных моделей.
+
+    Permutation importance считается по признакам модели (после FeatureEngineer,
+    до One-Hot), поэтому видны и инженерные признаки.
+    """
     classifier = pipeline.named_steps["classifier"]
-    names = pipeline.named_steps["preprocessor"].get_feature_names_out()
     if hasattr(classifier, "feature_importances_"):
-        values = classifier.feature_importances_
+        names = pipeline.named_steps["preprocessor"].get_feature_names_out()
+        values, method = classifier.feature_importances_, "impurity"
     elif hasattr(classifier, "coef_"):
-        values = np.abs(classifier.coef_[0])
+        names = pipeline.named_steps["preprocessor"].get_feature_names_out()
+        values, method = np.abs(classifier.coef_[0]), "|coefficient|"
     else:
         sample = X.sample(n=min(len(X), 3000), random_state=random_state)
         y_sample = pd.Series(np.asarray(y), index=X.index).loc[sample.index]
+        features = pipeline.named_steps["features"].transform(sample)
         result = permutation_importance(
-            pipeline,
-            sample,
+            pipeline[1:],  # preprocessor + classifier
+            features,
             y_sample,
             scoring="roc_auc",
             n_repeats=5,
             random_state=random_state,
             n_jobs=1,
         )
-        names, values = sample.columns, result.importances_mean
-    return pd.Series(values, index=names).sort_values(ascending=False)
+        names, values = features.columns, result.importances_mean
+        method = "permutation, ROC-AUC drop"
+    importances = pd.Series(values, index=names, name=method).sort_values(ascending=False)
+    return importances
 
 
 def plot_feature_importance(importances: pd.Series, path: Path, top_n: int = 20) -> Path:
     top = importances.head(top_n)[::-1]
     fig, ax = _new_axes((7, 0.32 * len(top) + 1.2))
     ax.barh(top.index, top.values)
-    ax.set(title=f"Top-{len(top)} feature importances", xlabel="Importance")
+    method = f" ({importances.name})" if importances.name else ""
+    ax.set(title=f"Top-{len(top)} feature importances{method}", xlabel="Importance")
     return _save(fig, path)
 
 

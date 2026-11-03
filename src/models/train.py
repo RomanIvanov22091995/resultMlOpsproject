@@ -141,6 +141,8 @@ def log_datasets(data: Dataset) -> None:
     """Связывает run с версиями train/test (MLflow Datasets: путь + хэш данных)."""
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", message="The specified dataset source")
+        # Схема датасета — только для информации, пропусков в данных нет.
+        warnings.filterwarnings("ignore", message="Hint: Inferred schema contains integer")
         for name, X, y, path, context in (
             ("train", data.X_train, data.y_train, data.train_path, "training"),
             ("test", data.X_test, data.y_test, data.test_path, "evaluation"),
@@ -327,12 +329,17 @@ def plot_model_comparison(summary: pd.DataFrame, scoring: str, path: Path) -> Pa
     fig = Figure(figsize=(8, 4.5))
     ax = fig.subplots()
     x = np.arange(len(summary))
-    ax.bar(x - 0.2, summary[f"cv_{scoring}_mean"], 0.4, label=f"CV {scoring}")
+    cv_mean, cv_std = summary[f"cv_{scoring}_mean"], summary[f"cv_{scoring}_std"]
+    ax.bar(x - 0.2, cv_mean, 0.4, yerr=cv_std, capsize=4, label=f"CV {scoring} (mean ± std)")
     ax.bar(x + 0.2, summary["test_roc_auc"], 0.4, label="Test ROC-AUC")
+    for i, (cv, std, test) in enumerate(zip(cv_mean, cv_std, summary["test_roc_auc"])):
+        ax.text(i - 0.2, cv + std + 0.002, f"{cv:.3f}", ha="center", fontsize=8)
+        ax.text(i + 0.2, test + 0.003, f"{test:.3f}", ha="center", fontsize=8)
     ax.set_xticks(x, summary["model"], rotation=20, ha="right")
-    low = min(summary[f"cv_{scoring}_mean"].min(), summary["test_roc_auc"].min())
-    ax.set_ylim(max(0.0, low - 0.05), 1.0)
-    ax.set(title="Model comparison", ylabel="ROC-AUC")
+    low = min(cv_mean.min(), summary["test_roc_auc"].min())
+    high = max((cv_mean + cv_std).max(), summary["test_roc_auc"].max())
+    ax.set_ylim(low - 0.03, high + 0.03)
+    ax.set(title="Model comparison (best model = highest CV score)", ylabel="ROC-AUC")
     ax.legend()
     ax.grid(axis="y", alpha=0.3)
     fig.tight_layout()
