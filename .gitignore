@@ -28,3 +28,6 @@ Thumbs.db
 
 # Личные заметки (не часть сдаваемого проекта)
 GUIDE_RU.md
+
+# pytest --basetemp (Windows)
+.pytest_tmp/
