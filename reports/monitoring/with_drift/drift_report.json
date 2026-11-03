@@ -1,0 +1,214 @@
+{
+  "summary": {
+    "scenario": "synthetic drift",
+    "mode": "api",
+    "n_samples": 1000,
+    "score_psi": 0.3985,
+    "score_status": "significant",
+    "key_features_psi": {
+      "AGE": 2.0797,
+      "LIMIT_BAL": 0.7848,
+      "PAY_0": 0.6005,
+      "BILL_AMT1": 0.048,
+      "PAY_AMT1": 0.005
+    },
+    "significant_features": [
+      "AGE",
+      "LIMIT_BAL",
+      "PAY_0"
+    ],
+    "moderate_features": [],
+    "reference_mean_pd": 0.2219,
+    "current_mean_pd": 0.3438,
+    "current_roc_auc": 0.6604,
+    "reference_test_roc_auc": 0.7793,
+    "latency_ms_p50": 67.47,
+    "latency_ms_p95": 79.03
+  },
+  "features": [
+    {
+      "feature": "AGE",
+      "type": "numeric",
+      "psi": 2.0797,
+      "status": "significant",
+      "reference_mean": 35.462,
+      "current_mean": 42.673
+    },
+    {
+      "feature": "LIMIT_BAL",
+      "type": "numeric",
+      "psi": 0.7848,
+      "status": "significant",
+      "reference_mean": 167272.638,
+      "current_mean": 100682.0
+    },
+    {
+      "feature": "PAY_0",
+      "type": "categorical",
+      "psi": 0.6005,
+      "status": "significant",
+      "reference_mean": -0.012,
+      "current_mean": 0.795
+    },
+    {
+      "feature": "BILL_AMT1",
+      "type": "numeric",
+      "psi": 0.048,
+      "status": "stable",
+      "reference_mean": 51270.569,
+      "current_mean": 65339.318
+    },
+    {
+      "feature": "PAY_4",
+      "type": "categorical",
+      "psi": 0.0148,
+      "status": "stable",
+      "reference_mean": -0.219,
+      "current_mean": -0.246
+    },
+    {
+      "feature": "PAY_3",
+      "type": "categorical",
+      "psi": 0.0134,
+      "status": "stable",
+      "reference_mean": -0.163,
+      "current_mean": -0.194
+    },
+    {
+      "feature": "BILL_AMT2",
+      "type": "numeric",
+      "psi": 0.0117,
+      "status": "stable",
+      "reference_mean": 49292.17,
+      "current_mean": 48922.95
+    },
+    {
+      "feature": "PAY_2",
+      "type": "categorical",
+      "psi": 0.0113,
+      "status": "stable",
+      "reference_mean": -0.128,
+      "current_mean": -0.193
+    },
+    {
+      "feature": "EDUCATION",
+      "type": "categorical",
+      "psi": 0.0107,
+      "status": "stable",
+      "reference_mean": 1.851,
+      "current_mean": 1.886
+    },
+    {
+      "feature": "PAY_5",
+      "type": "categorical",
+      "psi": 0.0093,
+      "status": "stable",
+      "reference_mean": -0.266,
+      "current_mean": -0.307
+    },
+    {
+      "feature": "PAY_6",
+      "type": "categorical",
+      "psi": 0.0092,
+      "status": "stable",
+      "reference_mean": -0.293,
+      "current_mean": -0.317
+    },
+    {
+      "feature": "BILL_AMT3",
+      "type": "numeric",
+      "psi": 0.0092,
+      "status": "stable",
+      "reference_mean": 47095.933,
+      "current_mean": 46878.814
+    },
+    {
+      "feature": "PAY_AMT4",
+      "type": "numeric",
+      "psi": 0.0087,
+      "status": "stable",
+      "reference_mean": 4807.29,
+      "current_mean": 3995.022
+    },
+    {
+      "feature": "BILL_AMT4",
+      "type": "numeric",
+      "psi": 0.0086,
+      "status": "stable",
+      "reference_mean": 43378.61,
+      "current_mean": 42961.343
+    },
+    {
+      "feature": "BILL_AMT6",
+      "type": "numeric",
+      "psi": 0.0084,
+      "status": "stable",
+      "reference_mean": 38899.466,
+      "current_mean": 38383.992
+    },
+    {
+      "feature": "BILL_AMT5",
+      "type": "numeric",
+      "psi": 0.0078,
+      "status": "stable",
+      "reference_mean": 40381.773,
+      "current_mean": 39212.833
+    },
+    {
+      "feature": "PAY_AMT3",
+      "type": "numeric",
+      "psi": 0.0076,
+      "status": "stable",
+      "reference_mean": 5224.316,
+      "current_mean": 4596.009
+    },
+    {
+      "feature": "PAY_AMT2",
+      "type": "numeric",
+      "psi": 0.0062,
+      "status": "stable",
+      "reference_mean": 5933.725,
+      "current_mean": 5366.954
+    },
+    {
+      "feature": "PAY_AMT1",
+      "type": "numeric",
+      "psi": 0.005,
+      "status": "stable",
+      "reference_mean": 5652.104,
+      "current_mean": 5626.282
+    },
+    {
+      "feature": "PAY_AMT5",
+      "type": "numeric",
+      "psi": 0.0047,
+      "status": "stable",
+      "reference_mean": 4791.897,
+      "current_mean": 5218.23
+    },
+    {
+      "feature": "PAY_AMT6",
+      "type": "numeric",
+      "psi": 0.0036,
+      "status": "stable",
+      "reference_mean": 5264.869,
+      "current_mean": 5492.062
+    },
+    {
+      "feature": "MARRIAGE",
+      "type": "categorical",
+      "psi": 0.0016,
+      "status": "stable",
+      "reference_mean": 1.553,
+      "current_mean": 1.561
+    },
+    {
+      "feature": "SEX",
+      "type": "categorical",
+      "psi": 0.0011,
+      "status": "stable",
+      "reference_mean": 1.602,
+      "current_mean": 1.618
+    }
+  ]
+}
